@@ -1,0 +1,18 @@
+.login-btn-wrapper {
+  padding-top: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.login-btn {
+  padding: 20px !important; 
+  background-color: #0394cb !important;
+}
+
+.login-btn:disabled {
+  color: #fff !important;
+  opacity: 0.6 !important;
+}
+
+.rating-icon {
+  font-size: 40px !important;
+}
