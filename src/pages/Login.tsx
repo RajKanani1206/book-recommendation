@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Button } from "antd";
 import "./style.css";
@@ -9,11 +9,10 @@ type FieldType = {
 };
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
 
-  const handleLogin = (): void => {
+  const handleLogin = (values: FieldType): void => {
+    const { username, password } = values;
     if (username && password) {
       localStorage.setItem("credentials", JSON.stringify({ username, password }));
       navigate("/books");
@@ -30,14 +29,14 @@ const Login: React.FC = () => {
             name="username"
             rules={[{ required: true, message: "Please input your username!" }]}
           >
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Input />
           </Form.Item>
           <Form.Item<FieldType>
             label="Password"
             name="password"
             rules={[{ required: true, message: "Please input your password!" }]}
           >
-            <Input.Password value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input.Password />
           </Form.Item>
           <Form.Item className="login-btn-wrapper">
             <Button type="primary" htmlType="submit" block className="login-btn">

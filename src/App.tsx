@@ -4,12 +4,13 @@ import Login from "./pages/Login";
 import BooksList from "./pages/BooksList";
 import AuthorizeUser from "./middleware/Auth";
 import BookDetails from "./pages/BookDetails";
+import NotFound from "./pages/NotFound";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route
           path="/books"
           element={
@@ -18,8 +19,15 @@ const App: React.FC = () => {
             </AuthorizeUser>
           }
         />
-        <Route path="/book/:bookId" element={<BookDetails />} />
-        <Route path="*" element={<Login />} />
+        <Route
+          path="/book/:bookId"
+          element={
+            <AuthorizeUser>
+              <BookDetails />
+            </AuthorizeUser>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
