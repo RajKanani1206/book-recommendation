@@ -1,53 +1,84 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
-import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+import {
+  ModuleRegistry,
+  AllCommunityModule,
+  ColDef,
+  ValueFormatterParams,
+  RowDoubleClickedEvent,
+} from "ag-grid-community";
+import { Spin } from "antd";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { useGetBooksQuery } from "../features/books/booksApiSlice";
-import { useNavigate } from "react-router-dom";
+import { BooksApiResponse } from "../types/book";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const valueFormatter = (params: any) => {
+interface RowData {
+  id: string;
+  title: string;
+  author?: string;
+  genre?: string;
+  rating?: number;
+}
+
+const valueFormatter = (params: ValueFormatterParams<RowData>): string => {
   const val = params.value;
   return typeof val === "number" ? val.toFixed(1) : val ?? "-";
 };
 
-const BooksList = () => {
+const BooksList: React.FC = () => {
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetBooksQuery();
+  const { data, isLoading, isError } = useGetBooksQuery() as {
+    data?: BooksApiResponse;
+    isLoading: boolean;
+    isError: boolean;
+  };
   const [searchText, setSearchText] = useState<string>("");
 
-  const handleRowDoubleClick = (event: any) => {
-    const bookId = event.data.id;
-    navigate(`/book/${bookId}`);
+  const handleRowDoubleClick = (event: RowDoubleClickedEvent<RowData>) => {
+    const bookId = event.data?.id;
+    if (bookId) {
+      navigate(`/book/${bookId}`);
+    }
   };
 
-  const rowData = useMemo(() => {
+  const rowData: RowData[] = useMemo(() => {
     if (!data?.items) return [];
     return data.items
-      .filter((item: any) =>
+      .filter((item) =>
         [item.volumeInfo.title, item.volumeInfo.authors?.join(", ") || ""]
           .join(" ")
           .toLowerCase()
           .includes(searchText.toLowerCase())
       )
-      .map((item: any) => ({
+      .map((item) => ({
         id: item.id,
         title: item.volumeInfo.title,
         author: item.volumeInfo.authors?.join(", "),
-        genre: item.volumeInfo.categories?.[0],
+        genre: item.volumeInfo.categories?.join(", "),
         rating: item.volumeInfo.averageRating,
       }));
   }, [data, searchText]);
 
-  const columnDefs = [
-    { headerName: "Title", field: "title", valueFormatter },
-    { headerName: "Author", field: "author", valueFormatter },
-    { headerName: "Genre", field: "genre", valueFormatter },
-    { headerName: "Avg Rating", field: "rating", valueFormatter },
-  ];
+  const columnDefs = useMemo<ColDef<RowData>[]>(
+    () => [
+      { headerName: "Title", field: "title", valueFormatter },
+      { headerName: "Author", field: "author", valueFormatter },
+      { headerName: "Genre", field: "genre", valueFormatter },
+      { headerName: "Avg Rating", field: "rating", valueFormatter },
+    ],
+    []
+  );
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large" />
+      </div>
+    );
+  }
   if (isError) return <div>Error loading books</div>;
 
   return (
@@ -61,7 +92,7 @@ const BooksList = () => {
         className="mb-5 p-5 w-xs border border-slate-300 rounded-lg focus:outline-none"
       />
       <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-        <AgGridReact
+        <AgGridReact<RowData>
           rowData={rowData}
           columnDefs={columnDefs}
           pagination={true}

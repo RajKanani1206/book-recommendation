@@ -1,24 +1,27 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useGetBooksQuery } from "../features/books/booksApiSlice";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { addReview } from "../features/reviews/reviewSlice";
 import { Rate, Input, Button, Spin } from "antd";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useGetBooksQuery } from "../features/books/booksApiSlice";
+import { addReview } from "../features/reviews/reviewSlice";
+import { BookItem, BooksApiResponse } from "../types/book";
 import "./style.css";
 
 const { TextArea } = Input;
 
-const BookDetails = () => {
+const BookDetails: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const dispatch = useAppDispatch();
-
-  const { data, isLoading } = useGetBooksQuery();
+  const { data, isLoading } = useGetBooksQuery() as {
+    data?: BooksApiResponse;
+    isLoading: boolean;
+  };
   const reviewData = useAppSelector((state) => state.reviews[bookId || ""]);
 
   const [rating, setRating] = React.useState<number>(0);
   const [review, setReview] = React.useState<string>("");
 
-  const book = data?.items.find((item: any) => item.id === bookId);
+  const book: BookItem | undefined = data?.items.find((item) => item.id === bookId);
 
   if (isLoading || !book) {
     return (
@@ -37,8 +40,6 @@ const BookDetails = () => {
   const displayAverage = reviewData?.averageRating ?? averageRating ?? 0;
   const displayCount = reviewData?.ratingsCount ?? ratingsCount ?? 0;
   const isSubmitted = !!reviewData;
-
-  console.log("reviewData", reviewData);
 
   return (
     <div className="min-h-screen">

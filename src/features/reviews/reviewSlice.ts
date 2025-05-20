@@ -24,12 +24,6 @@ const reviewSlice = createSlice({
       const newRatingsCount = (ratingsCount || 0) + 1;
       const newTotalRating = (averageRating * ratingsCount) + rating;
       const newAverageRating = newTotalRating / newRatingsCount;
-      console.log("averageRating", averageRating);
-      console.log("ratingsCount", ratingsCount);
-
-      console.log("rating", rating);
-
-
 
       state[bookId] = { rating, review, ratingsCount: newRatingsCount, averageRating: newAverageRating };
     },
