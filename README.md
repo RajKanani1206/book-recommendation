@@ -56,3 +56,6 @@ If you wish to run this app locally, clone this repo and install the dependencie
 
 - ⭐ **Dynamic Review System**  
   Each new rating updates the average rating and rating count in real time.
+
+- 🚫 **404 Page Not Found**  
+  A custom 404 page for undefined routes or broken links.

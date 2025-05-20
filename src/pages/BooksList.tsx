@@ -91,7 +91,7 @@ const BooksList: React.FC = () => {
 
   return (
     <div className="min-h-screen p-10">
-      <h3 className="text-3xl font-medium text-center pb-10">Books List</h3>
+      <h3 className="text-3xl font-medium text-center pb-10">List of Books</h3>
       <div className="max-w-5xl mx-auto h-120">
         <input
           type="text"
