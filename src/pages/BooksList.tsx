@@ -8,8 +8,9 @@ import {
   ValueFormatterParams,
   RowDoubleClickedEvent,
 } from "ag-grid-community";
-import { Spin } from "antd";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { Spin } from "antd";
+import { useAppSelector } from "../app/hooks";
 import { useGetBooksQuery } from "../features/books/booksApiSlice";
 import { BooksApiResponse } from "../types/book";
 
@@ -30,6 +31,7 @@ const valueFormatter = (params: ValueFormatterParams<RowData>): string => {
 
 const BooksList: React.FC = () => {
   const navigate = useNavigate();
+  const reviewState = useAppSelector((state) => state.reviews);
   const { data, isLoading, isError } = useGetBooksQuery() as {
     data?: BooksApiResponse;
     isLoading: boolean;
@@ -53,13 +55,16 @@ const BooksList: React.FC = () => {
           .toLowerCase()
           .includes(searchText.toLowerCase())
       )
-      .map((item) => ({
-        id: item.id,
-        title: item.volumeInfo.title,
-        author: item.volumeInfo.authors?.join(", "),
-        genre: item.volumeInfo.categories?.join(", "),
-        rating: item.volumeInfo.averageRating,
-      }));
+      .map((item) => {
+        const review = reviewState[item.id];
+        return {
+          id: item.id,
+          title: item.volumeInfo.title,
+          author: item.volumeInfo.authors?.join(", "),
+          genre: item.volumeInfo.categories?.join(", "),
+          rating: review?.averageRating ?? item.volumeInfo.averageRating,
+        };
+      });
   }, [data, searchText]);
 
   const columnDefs = useMemo<ColDef<RowData>[]>(
@@ -71,6 +76,9 @@ const BooksList: React.FC = () => {
     ],
     []
   );
+  const defaultColDef: ColDef = {
+    flex: 1,
+  };
 
   if (isLoading) {
     return (
@@ -84,21 +92,24 @@ const BooksList: React.FC = () => {
   return (
     <div className="min-h-screen p-10">
       <h3 className="text-3xl font-medium text-center pb-10">Books List</h3>
-      <input
-        type="text"
-        placeholder="Search by title or author..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="mb-5 p-5 w-xs border border-slate-300 rounded-lg focus:outline-none"
-      />
-      <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-        <AgGridReact<RowData>
-          rowData={rowData}
-          columnDefs={columnDefs}
-          pagination={true}
-          paginationPageSize={20}
-          onRowDoubleClicked={handleRowDoubleClick}
+      <div className="max-w-5xl mx-auto h-120">
+        <input
+          type="text"
+          placeholder="Search by title or author..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="mb-5 p-5 w-xs border border-slate-300 rounded-lg focus:outline-none"
         />
+        <div className="ag-theme-alpine w-full h-full">
+          <AgGridReact<RowData>
+            rowData={rowData}
+            columnDefs={columnDefs}
+            pagination={true}
+            paginationPageSize={20}
+            onRowDoubleClicked={handleRowDoubleClick}
+            defaultColDef={defaultColDef}
+          />
+        </div>
       </div>
     </div>
   );
